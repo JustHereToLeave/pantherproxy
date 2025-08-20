@@ -1,0 +1,18 @@
+{
+  "name": "pantherproxy",
+  "version": "1.0.0",
+  "description": "a proxy for the panthers.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mercuryworkshop/bare-mux": "^1.2.0",
+    "@mercuryworkshop/epoxy-transport": "^1.1.0",
+    "@titaniumnetwork-dev/ultraviolet": "^3.0.0",
+    "express": "^4.18.2"
+  }
+}
