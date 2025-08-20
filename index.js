@@ -1,51 +1,43 @@
 // Filename: index.js
+import { createBareServer } from '@tomphttp/bare-server-node';
 import express from 'express';
 import { createServer } from 'node:http';
 import { uvPath } from '@titaniumnetwork-dev/ultraviolet';
-import { epoxyPath } from '@mercuryworkshop/epoxy-transport';
-import { baremuxPath } from '@mercuryworkshop/bare-mux';
-import { join } from 'node:path';
-import { hostname } from 'node:os';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
-const publicPath = 'public/'; // A folder named 'public' will hold our front-end
 const server = createServer();
+// Create a Bare server instance, which is the backend for Ultraviolet
+const bareServer = createBareServer('/bare/');
 
-// Serve the front-end files from the 'public' directory
-app.use(express.static(publicPath));
-
-// Serve the Ultraviolet scripts
+// Serve the Ultraviolet scripts from the installed package
 app.use('/uv/', express.static(uvPath));
-// Serve Epoxy scripts
-app.use('/epoxy/', express.static(epoxyPath));
-// Serve Bare-Mux scripts
-app.use('/baremux/', express.static(baremuxPath));
 
-// When a user visits the root, send them the main HTML page
-app.get('/', (req, res) => {
-    res.sendFile(join(publicPath, 'index.html'));
-});
+// Serve the frontend files (index.html, uv.config.js) from the project root
+app.use(express.static(__dirname));
 
-// Handle 404 errors for any other routes
+// This handles the regular HTTP requests for the proxy
 app.use((req, res) => {
-    res.status(404);
-    res.sendFile(join(publicPath, '404.html')); // You can create a custom 404 page if you want
+    if (bareServer.shouldRoute(req)) {
+        bareServer.routeRequest(req, res);
+    } else {
+        res.status(404).send('Not Found');
+    }
 });
 
-server.on('request', (req, res) => {
-    // Let express handle the static files and routing
-    app(req, res);
-});
-
+// This handles the WebSocket connections, which are crucial for many sites
 server.on('upgrade', (req, socket, head) => {
-    // This part is crucial for Ultraviolet's real-time communication
-    if (req.url.endsWith('/w/')) {
-        // Handle WebSocket upgrades for the proxy
-        // (This is an advanced part of the proxy setup that Ultraviolet handles)
+    if (bareServer.shouldRoute(req)) {
+        bareServer.routeUpgrade(req, socket, head);
     } else {
         socket.destroy();
     }
 });
+
+server.on('request', app);
 
 const port = process.env.PORT || 8080;
 server.listen(port, () => {
