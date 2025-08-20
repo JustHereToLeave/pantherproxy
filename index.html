@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pantherproxy</title>
+    <!-- The client-side script for Ultraviolet -->
+    <script src="/uv/uv.bundle.js"></script>
+    <script src="/uv/uv.config.js"></script>
+    <style>
+        :root {
+            --primary-bg: #2c2538;
+            --window-bg: #4a4258;
+            --title-bar-start: #1e1a26;
+            --title-bar-end: #2c2538;
+            --text-color: #e0e0e0;
+            --border-light: #6a6278;
+            --border-dark: #1e1a26;
+        }
+
+        body {
+            font-family: "Tahoma", "Geneva", "MS Sans Serif", sans-serif;
+            font-size: 12px;
+            background-color: var(--primary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: var(--text-color);
+        }
+
+        .window {
+            background-color: var(--window-bg);
+            border: 1px solid;
+            border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            padding: 3px;
+            width: 100%;
+            max-width: 900px;
+            height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, var(--title-bar-start), var(--title-bar-end));
+            color: white;
+            padding: 4px 6px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+
+        .title-bar-text {
+            flex-grow: 1;
+        }
+        
+        .title-bar-controls {
+            display: flex;
+        }
+
+        .title-bar-controls button {
+            background-color: var(--window-bg);
+            border: 1px solid;
+            border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+            width: 18px;
+            height: 16px;
+            margin-left: 2px;
+            font-weight: bold;
+            font-family: "Marlett", "System", serif;
+            font-size: 10px;
+            line-height: 10px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-color);
+        }
+
+        .title-bar-controls button:active {
+            border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+        }
+
+        .window-body {
+            padding: 10px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .address-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .address-bar label {
+            margin-right: 8px;
+            white-space: nowrap;
+        }
+
+        .address-bar input[type="text"] {
+            flex-grow: 1;
+            background-color: #3a324a;
+            border: 1px solid var(--border-dark);
+            box-shadow: inset 1px 1px 0 var(--border-dark), inset -1px -1px 0 var(--border-light);
+            padding: 4px;
+            font-family: inherit;
+            font-size: inherit;
+            color: var(--text-color);
+        }
+        
+        .address-bar input[type="text"]:focus {
+            outline: none;
+        }
+
+        .win95-button {
+            background-color: var(--window-bg);
+            border: 1px solid;
+            border-color: var(--border-light) var(--border-dark) var(--border-dark) var(--border-light);
+            box-shadow: 1px 1px 1px var(--border-dark);
+            padding: 5px 12px;
+            margin-left: 8px;
+            color: var(--text-color);
+        }
+
+        .win95-button:active {
+            border-color: var(--border-dark) var(--border-light) var(--border-light) var(--border-dark);
+            box-shadow: none;
+            transform: translate(1px, 1px);
+        }
+
+        .content-container {
+            flex-grow: 1;
+            background-color: white;
+            border: 1px solid var(--border-dark);
+            box-shadow: inset 1px 1px 0 var(--border-dark), inset -1px -1px 0 var(--border-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #content-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .status-container {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            background-color: var(--primary-bg);
+            color: #a09cb0;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="window">
+        <div class="title-bar">
+            <span class="title-bar-text">pantherproxy</span>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize">0</button>
+                <button aria-label="Maximize">1</button>
+                <button aria-label="Close">r</button>
+            </div>
+        </div>
+        <div class="window-body">
+            <form id="proxy-form" class="address-bar">
+                <label for="url-input">Address:</label>
+                <input type="text" id="url-input" placeholder="Search or type a URL">
+                <button type="submit" class="win95-button">Go</button>
+            </form>
+            <div class="content-container">
+                <div id="status-container" class="status-container">
+                    <p>Enter a URL to begin browsing.<br><br>pantherproxy initialized. ready.</p>
+                </div>
+                <iframe id="content-frame"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wait until the DOM and all scripts are loaded before running our code
+        window.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('proxy-form');
+            const urlInput = document.getElementById('url-input');
+            const iframe = document.getElementById('content-frame');
+            const statusContainer = document.getElementById('status-container');
+
+            // Check if __uv$config is available. If not, the proxy can't work.
+            if (typeof __uv$config === 'undefined') {
+                statusContainer.innerHTML = `<p>Error: Ultraviolet configuration not found. The proxy cannot start.</p>`;
+                return;
+            }
+
+            // Register the service worker
+            navigator.serviceWorker.register('/uv/sw.js', {
+                scope: __uv$config.prefix
+            }).then(() => {
+                console.log('Service worker registered.');
+            }).catch(e => {
+                console.error('Failed to register service worker:', e);
+                statusContainer.innerHTML = `<p>Error: Failed to register service worker. The proxy will not work.</p>`;
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                let url = urlInput.value.trim();
+
+                if (!url) return;
+
+                // Show a loading message
+                statusContainer.classList.remove('hidden');
+                iframe.classList.add('hidden');
+                statusContainer.innerHTML = `<p>Loading...</p>`;
+
+                try {
+                    // Use the Ultraviolet function to encode the URL
+                    const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
+                    iframe.src = encodedUrl;
+                } catch (err) {
+                    console.error('URL encoding error:', err);
+                    statusContainer.innerHTML = `<p>Error: Invalid URL. Please try again.</p>`;
+                }
+            });
+            
+            iframe.addEventListener('load', () => {
+                // When the iframe successfully loads content from the proxy, hide the status message
+                statusContainer.classList.add('hidden');
+                iframe.classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
