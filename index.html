@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>pantherproxy</title>
-    <!-- The client-side script for Ultraviolet -->
+    <!-- Ultraviolet scripts -->
     <script src="/uv/uv.bundle.js"></script>
-    <script src="/uv/uv.config.js"></script>
+    <script src="/uv.config.js"></script>
     <style>
         :root {
             --primary-bg: #2c2538;
@@ -195,20 +195,21 @@
     </div>
 
     <script>
-        // Wait until the DOM and all scripts are loaded before running our code
+        // This event listener ensures that the DOM and all scripts (like uv.config.js)
+        // are loaded before our proxy code tries to run. This fixes the error.
         window.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('proxy-form');
             const urlInput = document.getElementById('url-input');
             const iframe = document.getElementById('content-frame');
             const statusContainer = document.getElementById('status-container');
 
-            // Check if __uv$config is available. If not, the proxy can't work.
+            // Check if the Ultraviolet config object is available.
             if (typeof __uv$config === 'undefined') {
                 statusContainer.innerHTML = `<p>Error: Ultraviolet configuration not found. The proxy cannot start.</p>`;
                 return;
             }
 
-            // Register the service worker
+            // Register the service worker, which is crucial for the proxy to function.
             navigator.serviceWorker.register('/uv/sw.js', {
                 scope: __uv$config.prefix
             }).then(() => {
@@ -224,13 +225,12 @@
 
                 if (!url) return;
 
-                // Show a loading message
                 statusContainer.classList.remove('hidden');
                 iframe.classList.add('hidden');
                 statusContainer.innerHTML = `<p>Loading...</p>`;
 
                 try {
-                    // Use the Ultraviolet function to encode the URL
+                    // We use the global __uv$config object to correctly encode the URL.
                     const encodedUrl = __uv$config.prefix + __uv$config.encodeUrl(url);
                     iframe.src = encodedUrl;
                 } catch (err) {
@@ -240,7 +240,6 @@
             });
             
             iframe.addEventListener('load', () => {
-                // When the iframe successfully loads content from the proxy, hide the status message
                 statusContainer.classList.add('hidden');
                 iframe.classList.remove('hidden');
             });
